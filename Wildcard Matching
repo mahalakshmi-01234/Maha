@@ -1,0 +1,54 @@
+lass Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+        """
+        Wildcard pattern matching with '?' and '*'.
+        '?' matches any single character.
+        '*' matches any sequence of characters (including empty sequence).
+      
+        Args:
+            s: The input string to match.
+            p: The pattern string containing wildcards.
+      
+        Returns:
+            True if the entire string matches the pattern, False otherwise.
+        """
+        from functools import cache
+      
+        @cache
+        def dfs(string_idx: int, pattern_idx: int) -> bool:
+            """
+            Recursively check if substring s[string_idx:] matches pattern p[pattern_idx:].
+          
+            Args:
+                string_idx: Current index in the string s.
+                pattern_idx: Current index in the pattern p.
+          
+            Returns:
+                True if the remaining substring matches the remaining pattern.
+            """
+            # Base case: reached end of string
+            if string_idx >= len(s):
+                # Check if pattern is also exhausted or only has '*' remaining
+                return pattern_idx >= len(p) or (p[pattern_idx] == "*" and dfs(string_idx, pattern_idx + 1))
+          
+            # Base case: pattern exhausted but string still has characters
+            if pattern_idx >= len(p):
+                return False
+          
+            # Case 1: current pattern character is '*'
+            if p[pattern_idx] == "*":
+                # Three options:
+                # 1. Match one character from string and stay at '*' (match more)
+                # 2. Match one character from string and move past '*' (match exactly one)
+                # 3. Match zero characters and move past '*' (match empty)
+                return (dfs(string_idx + 1, pattern_idx) or 
+                        dfs(string_idx + 1, pattern_idx + 1) or 
+                        dfs(string_idx, pattern_idx + 1))
+          
+            # Case 2: current pattern is '?' or exact character match
+            # Both string and pattern must advance together
+            return ((p[pattern_idx] == "?" or s[string_idx] == p[pattern_idx]) and 
+                    dfs(string_idx + 1, pattern_idx + 1))
+      
+        # Start matching from the beginning of both strings
+        return dfs(0, 0)
